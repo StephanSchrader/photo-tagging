@@ -36,7 +36,16 @@ public class GenerateMetadataCmd {
         var image = Base64.getEncoder().encodeToString(imageData);
 
         var prompt = "Ihre Rolle ist die eines Zeitungsredakteurs. Beschreiben Sie das Thema des Bildes in einer Überschrift mit weniger als 8 Wörtern.";
+        var promptHeadline = "You are a newspaper editor. Describe the topic of the image in a headline with less than 8 words.";
+        var promptAbstract = "Your role is a photographer. Create a very precise summary about the image with less than 300 characters.";
+        var promptKeywords = "Your role is a photographer. Find %s single keywords describing the image.".formatted(5);
 
+        invokeLLm(modelLLaVa, promptHeadline, image);
+        invokeLLm(modelLLaVa, promptAbstract, image);
+        invokeLLm(modelLLaVa, promptKeywords, image);
+    }
+
+    private void invokeLLm(String modelLLaVa, String prompt, String image) {
         try (HttpClient http = HttpClient.newBuilder().build()) {
             var payload = """
                     {
@@ -46,7 +55,7 @@ public class GenerateMetadataCmd {
                         "temperature": 10,
                         "images": ["%s"]
                     }
-                    """.formatted(modelJanus, prompt, image);
+                    """.formatted(modelLLaVa, prompt, image);
 
             var request = HttpRequest.newBuilder()
                     .uri(URI.create("http://127.0.0.1:11434/api/generate"))
